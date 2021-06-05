@@ -26,7 +26,7 @@ import { VideoChannelModel } from '../models/video/video-channel'
 import { getActivityStreamDuration } from '../models/video/video-format-utils'
 import { VideoPlaylistModel } from '../models/video/video-playlist'
 import { MAccountActor, MChannelActor } from '../types/models'
-import { getHTMLServerConfig } from './config'
+import { ServerConfigManager } from './server-config-manager'
 
 type Tags = {
   ogType: string
@@ -198,11 +198,22 @@ class ClientHtml {
   }
 
   static async getAccountHTMLPage (nameWithHost: string, req: express.Request, res: express.Response) {
-    return this.getAccountOrChannelHTMLPage(() => AccountModel.loadByNameWithHost(nameWithHost), req, res)
+    const accountModelPromise = AccountModel.loadByNameWithHost(nameWithHost)
+    return this.getAccountOrChannelHTMLPage(() => accountModelPromise, req, res)
   }
 
   static async getVideoChannelHTMLPage (nameWithHost: string, req: express.Request, res: express.Response) {
-    return this.getAccountOrChannelHTMLPage(() => VideoChannelModel.loadByNameWithHostAndPopulateAccount(nameWithHost), req, res)
+    const videoChannelModelPromise = VideoChannelModel.loadByNameWithHostAndPopulateAccount(nameWithHost)
+    return this.getAccountOrChannelHTMLPage(() => videoChannelModelPromise, req, res)
+  }
+
+  static async getActorHTMLPage (nameWithHost: string, req: express.Request, res: express.Response) {
+    const [ account, channel ] = await Promise.all([
+      AccountModel.loadByNameWithHost(nameWithHost),
+      VideoChannelModel.loadByNameWithHostAndPopulateAccount(nameWithHost)
+    ])
+
+    return this.getAccountOrChannelHTMLPage(() => Promise.resolve(account || channel), req, res)
   }
 
   static async getEmbedHTML () {
@@ -211,7 +222,7 @@ class ClientHtml {
     if (!isTestInstance() && ClientHtml.htmlCache[path]) return ClientHtml.htmlCache[path]
 
     const buffer = await readFile(path)
-    const serverConfig = await getHTMLServerConfig()
+    const serverConfig = await ServerConfigManager.Instance.getHTMLServerConfig()
 
     let html = buffer.toString()
     html = await ClientHtml.addAsyncPluginCSS(html)
@@ -280,7 +291,7 @@ class ClientHtml {
     if (!isTestInstance() && ClientHtml.htmlCache[path]) return ClientHtml.htmlCache[path]
 
     const buffer = await readFile(path)
-    const serverConfig = await getHTMLServerConfig()
+    const serverConfig = await ServerConfigManager.Instance.getHTMLServerConfig()
 
     let html = buffer.toString()
 
@@ -538,11 +549,11 @@ async function serveIndexHTML (req: express.Request, res: express.Response) {
       return
     } catch (err) {
       logger.error('Cannot generate HTML page.', err)
-      return res.sendStatus(HttpStatusCode.INTERNAL_SERVER_ERROR_500)
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR_500).end()
     }
   }
 
-  return res.sendStatus(HttpStatusCode.NOT_ACCEPTABLE_406)
+  return res.status(HttpStatusCode.NOT_ACCEPTABLE_406).end()
 }
 
 // ---------------------------------------------------------------------------

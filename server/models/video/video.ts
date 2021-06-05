@@ -1004,18 +1004,19 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
     })
   }
 
-  static async listPublishedLiveIds () {
+  static async listPublishedLiveUUIDs () {
     const options = {
-      attributes: [ 'id' ],
+      attributes: [ 'uuid' ],
       where: {
         isLive: true,
+        remote: false,
         state: VideoState.PUBLISHED
       }
     }
 
     const result = await VideoModel.findAll(options)
 
-    return result.map(v => v.id)
+    return result.map(v => v.uuid)
   }
 
   static listUserVideosForApi (options: {
@@ -1919,7 +1920,7 @@ export class VideoModel extends Model<Partial<AttributesOnly<VideoModel>>> {
   }
 
   getWatchStaticPath () {
-    return '/videos/watch/' + this.uuid
+    return '/w/' + this.uuid
   }
 
   getEmbedStaticPath () {

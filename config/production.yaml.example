@@ -94,7 +94,7 @@ storage:
   client_overrides: '/var/www/peertube/storage/client-overrides/'
 
 log:
-  level: 'info' # debug/info/warning/error
+  level: 'info' # 'debug' | 'info' | 'warn' | 'error'
   rotation:
     enabled : true # Enabled by default, if disabled make sure that 'storage.logs' is pointing to a folder handled by logrotate
     maxFileSize: 12MB
@@ -239,6 +239,7 @@ contact_form:
 signup:
   enabled: false
   limit: 10 # When the limit is reached, registrations are disabled. -1 == unlimited
+  mimimum_age: 16
   requires_email_verification: false
   filters:
     cidr: # You can specify CIDR ranges to whitelist (empty = no filtering) or blacklist

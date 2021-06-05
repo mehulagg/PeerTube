@@ -238,11 +238,11 @@ export class UserNotification implements UserNotificationServer {
   }
 
   private buildVideoUrl (video: { uuid: string }) {
-    return '/videos/watch/' + video.uuid
+    return '/w/' + video.uuid
   }
 
   private buildAccountUrl (account: { name: string, host: string }) {
-    return '/accounts/' + Actor.CREATE_BY_STRING(account.name, account.host)
+    return '/a/' + Actor.CREATE_BY_STRING(account.name, account.host)
   }
 
   private buildVideoImportUrl () {

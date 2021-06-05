@@ -1,6 +1,21 @@
 # Changelog
 
-## v3.2.0-rc.1
+## v3.2.1
+
+### IMPORTANT NOTES
+
+ * **Important:** v3.2.0 introduced a `pg_dump` export bug in the auto upgrade script. To upgrade from v3.2.0:
+   * You can upgrade manually https://docs.joinpeertube.org/install-any-os?id=manually
+   * Or you can apply the changes introduced in this commit: https://github.com/Chocobozzz/PeerTube/commit/86dc0b9cc9374cba7548bb613ff43d92f90570a8 and then use the auto upgrade script
+
+### Bug fixes
+
+ * Fix create account button style
+ * Fix auto upgrade script
+ * Fix live image aspect ratio in theatre mode
+
+
+## v3.2.0
 
 ### IMPORTANT NOTES
 
@@ -12,6 +27,10 @@
  See [the documentation](https://docs.joinpeertube.org/admin-configuration?id=webtorrent-transcoding-or-hls-transcoding) for more information
  * PeerTube client now displays bigger video thumbnails.
  To fix old thumbnails quality, run `regenerate-thumbnails` script after your PeerTube upgrade: https://docs.joinpeertube.org/maintain-tools?id=regenerate-thumbnailsjs
+
+### Docker
+
+ * Support SSL database env parameter [#4114](https://github.com/Chocobozzz/PeerTube/pull/4114)
 
 ### Maintenance
 
@@ -129,6 +148,15 @@
  * Fix transcoding job priority preventing video publication when there are many videos to transcode
  * Fix remote account/channel "joined at"
  * Fix CLI plugins list command options [#4055](https://github.com/Chocobozzz/PeerTube/pull/4055)
+ * Fix HTTP player defaulting to audio resolution
+ * Logger warning level is "warn"
+ * Fix default boolean plugin setting [#4107](https://github.com/Chocobozzz/PeerTube/pull/4107)
+ * Fix duplicate ffmpeg preset option for live
+ * Avoid federation error when file has no torrent file
+ * Fix local user auth select
+ * Fix live ending banner display
+ * Fix redundancy max size
+ * Fix broken lives handling
 
 
 

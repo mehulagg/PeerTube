@@ -2,7 +2,7 @@ import * as cors from 'cors'
 import * as express from 'express'
 import { join } from 'path'
 import { serveIndexHTML } from '@server/lib/client-html'
-import { getEnabledResolutions, getRegisteredPlugins, getRegisteredThemes } from '@server/lib/config'
+import { ServerConfigManager } from '@server/lib/server-config-manager'
 import { HttpStatusCode } from '@shared/core-utils/miscs/http-error-codes'
 import { HttpNodeinfoDiasporaSoftwareNsSchema20 } from '../../shared/models/nodeinfo/nodeinfo.model'
 import { root } from '../helpers/core-utils'
@@ -160,10 +160,9 @@ async function generateNodeinfo (req: express.Request, res: express.Response) {
   const { totalVideos } = await VideoModel.getStats()
   const { totalLocalVideoComments } = await VideoCommentModel.getStats()
   const { totalUsers, totalMonthlyActiveUsers, totalHalfYearActiveUsers } = await UserModel.getStats()
-  let json = {}
 
   if (req.params.version && (req.params.version === '2.0')) {
-    json = {
+    const json = {
       version: '2.0',
       software: {
         name: 'peertube',
@@ -203,10 +202,10 @@ async function generateNodeinfo (req: express.Request, res: express.Response) {
             }
           },
           plugin: {
-            registered: getRegisteredPlugins()
+            registered: ServerConfigManager.Instance.getRegisteredPlugins()
           },
           theme: {
-            registered: getRegisteredThemes(),
+            registered: ServerConfigManager.Instance.getRegisteredThemes(),
             default: getThemeOrDefault(CONFIG.THEME.DEFAULT, DEFAULT_THEME_NAME)
           },
           email: {
@@ -222,13 +221,13 @@ async function generateNodeinfo (req: express.Request, res: express.Response) {
             webtorrent: {
               enabled: CONFIG.TRANSCODING.WEBTORRENT.ENABLED
             },
-            enabledResolutions: getEnabledResolutions('vod')
+            enabledResolutions: ServerConfigManager.Instance.getEnabledResolutions('vod')
           },
           live: {
             enabled: CONFIG.LIVE.ENABLED,
             transcoding: {
               enabled: CONFIG.LIVE.TRANSCODING.ENABLED,
-              enabledResolutions: getEnabledResolutions('live')
+              enabledResolutions: ServerConfigManager.Instance.getEnabledResolutions('live')
             }
           },
           import: {
@@ -291,12 +290,14 @@ async function generateNodeinfo (req: express.Request, res: express.Response) {
       }
     } as HttpNodeinfoDiasporaSoftwareNsSchema20
     res.contentType('application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.0#"')
-  } else {
-    json = { error: 'Nodeinfo schema version not handled' }
-    res.status(HttpStatusCode.NOT_FOUND_404)
+       .send(json)
+       .end()
   }
 
-  return res.send(json).end()
+  return res.fail({
+    status: HttpStatusCode.NOT_FOUND_404,
+    message: 'Nodeinfo schema version not handled'
+  })
 }
 
 function getCup (req: express.Request, res: express.Response, next: express.NextFunction) {

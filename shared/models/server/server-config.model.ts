@@ -84,6 +84,7 @@ export interface ServerConfig {
     allowed: boolean
     allowedForCurrentIP: boolean
     requiresEmailVerification: boolean
+    minimumAge: number
   }
 
   transcoding: {
@@ -213,6 +214,10 @@ export interface ServerConfig {
     message: string
     level: BroadcastMessageLevel
     dismissable: boolean
+  }
+
+  homepage: {
+    enabled: boolean
   }
 }
 
